@@ -1,0 +1,26 @@
+[
+  {
+    "id": "5dc3cfc1-ed6e-4b83-a656-ddb8b52c8079",
+    "username": "port8080test",
+    "password": "$2b$10$GMhXFCvLklM6TGFvBppsyOBxLRDdZE0o8gnxYs2i77IMv.suGerBm",
+    "isAdmin": false
+  },
+  {
+    "id": "17af2125-a57b-4550-b0df-47cee4c9f81e",
+    "username": "verifieduser",
+    "password": "$2b$10$pi5zebwSz5t2.mMqcro7UuIf3fzFL2cTO5Y5rIZPi9G5xaXZKbbVC",
+    "isAdmin": false
+  },
+  {
+    "id": "b8681996-1a27-474a-be1c-364748cbde57",
+    "username": "mahi",
+    "password": "$2b$10$zDTfAongPyR4exZ8VRJpjumfEDpZkomQpxqHEA1.J.b7ZiGlHDv8K",
+    "isAdmin": false
+  },
+  {
+    "id": "9c6b2b52-1127-4d23-bda4-f13994deda89",
+    "username": "admin",
+    "password": "$2b$10$VZjwcwKflfpAaGK6Q3TMHO0Ld0UqQEwmcmWXzjEurqOrGNcgu9cHa",
+    "isAdmin": true
+  }
+]
