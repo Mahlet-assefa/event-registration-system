@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/authContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Admin from './pages/Admin';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function Navigation() {
     const { user, logout } = useAuth();
@@ -14,6 +17,7 @@ function Navigation() {
                     <Link to="/" className="text-gray-600 hover:text-blue-600">Events</Link>
                     {user ? (
                         <>
+                            {user.isAdmin && <Link to="/admin" className="text-gray-600 hover:text-blue-600">Admin</Link>}
                             <span className="text-gray-800 font-medium">Hello, {user.username}</span>
                             <button
                                 onClick={logout}
@@ -43,7 +47,8 @@ function App() {
                     <Routes>
                         <Route path="/login" element={<Login />} />
                         <Route path="/register" element={<Register />} />
-                        <Route path="/" element={<div className="container mx-auto p-6"><h1 className="text-2xl">Welcome to EventSys</h1><p>Please login or register.</p></div>} />
+                        <Route path="/admin" element={<ProtectedRoute adminOnly={true}><Admin /></ProtectedRoute>} />
+                        <Route path="/" element={<Dashboard />} />
                     </Routes>
                 </div>
             </Router>
