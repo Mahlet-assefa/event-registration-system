@@ -1,35 +1,54 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { AuthProvider, useAuth } from './context/authContext';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
-function App() {
-    const [count, setCount] = useState(0)
+function Navigation() {
+    const { user, logout } = useAuth();
 
     return (
-        <>
-            <div>
-                <a href="https://vite.dev" target="_blank">
-                    <img src={viteLogo} className="logo" alt="Vite logo" />
-                </a>
-                <a href="https://react.dev" target="_blank">
-                    <img src={reactLogo} className="logo react" alt="React logo" />
-                </a>
+        <nav className="bg-white shadow-sm">
+            <div className="container mx-auto px-6 py-4 flex justify-between items-center">
+                <Link to="/" className="text-xl font-bold text-blue-600">EventSys</Link>
+                <div className="space-x-4">
+                    <Link to="/" className="text-gray-600 hover:text-blue-600">Events</Link>
+                    {user ? (
+                        <>
+                            <span className="text-gray-800 font-medium">Hello, {user.username}</span>
+                            <button
+                                onClick={logout}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                Logout
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/login" className="text-gray-600 hover:text-blue-600">Login</Link>
+                            <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Register</Link>
+                        </>
+                    )}
+                </div>
             </div>
-            <h1>Vite + React</h1>
-            <div className="card">
-                <button onClick={() => setCount((count) => count + 1)}>
-                    count is {count}
-                </button>
-                <p>
-                    Edit <code>src/App.jsx</code> and save to test HMR
-                </p>
-            </div>
-            <p className="read-the-docs">
-                Click on the Vite and React logos to learn more
-            </p>
-        </>
-    )
+        </nav>
+    );
 }
 
-export default App
+function App() {
+    return (
+        <AuthProvider>
+            <Router>
+                <div className="min-h-screen bg-gray-50">
+                    <Navigation />
+                    <Routes>
+                        <Route path="/login" element={<Login />} />
+                        <Route path="/register" element={<Register />} />
+                        <Route path="/" element={<div className="container mx-auto p-6"><h1 className="text-2xl">Welcome to EventSys</h1><p>Please login or register.</p></div>} />
+                    </Routes>
+                </div>
+            </Router>
+        </AuthProvider>
+    );
+}
+
+export default App;
