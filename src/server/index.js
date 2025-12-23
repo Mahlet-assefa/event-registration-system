@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 
 const authRoutes = require('./routes/auth-routes');
+const eventRoutes = require('./routes/event-routes');
 
 const fs = require('fs');
 const path = require('path');
@@ -23,6 +24,7 @@ app.use((req, res, next) => {
 
 console.log('Mounting /api/v1/auth', authRoutes);
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/events', eventRoutes);
 console.log('Routes mounted');
 
 app.get('/', (req, res) => {
