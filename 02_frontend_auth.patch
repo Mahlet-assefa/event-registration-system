@@ -1,0 +1,354 @@
+From 87148f8eb9b938157aca8c94a17ef5a515371839 Mon Sep 17 00:00:00 2001
+From: Mahlet-assefa <mahletassefacodes@gmail.com>
+Date: Wed, 24 Dec 2025 00:03:29 +0300
+Subject: [PATCH] Patch 2: Frontend Auth
+
+---
+ src/client/src/App.jsx                       | 77 ++++++++++++--------
+ src/client/src/components/ProtectedRoute.jsx | 22 ++++++
+ src/client/src/context/authContext.jsx       | 72 ++++++++++++++++++
+ src/client/src/pages/Login.jsx               | 64 ++++++++++++++++
+ src/client/src/pages/Register.jsx            | 64 ++++++++++++++++
+ 5 files changed, 270 insertions(+), 29 deletions(-)
+ create mode 100644 src/client/src/components/ProtectedRoute.jsx
+ create mode 100644 src/client/src/context/authContext.jsx
+ create mode 100644 src/client/src/pages/Login.jsx
+ create mode 100644 src/client/src/pages/Register.jsx
+
+diff --git a/src/client/src/App.jsx b/src/client/src/App.jsx
+index 1ce69ca..d562fda 100644
+--- a/src/client/src/App.jsx
++++ b/src/client/src/App.jsx
+@@ -1,35 +1,54 @@
+-import { useState } from 'react'
+-import reactLogo from './assets/react.svg'
+-import viteLogo from '/vite.svg'
+-import './App.css'
++import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
++import { AuthProvider, useAuth } from './context/authContext';
++import Login from './pages/Login';
++import Register from './pages/Register';
+ 
+-function App() {
+-    const [count, setCount] = useState(0)
++function Navigation() {
++    const { user, logout } = useAuth();
+ 
+     return (
+-        <>
+-            <div>
+-                <a href="https://vite.dev" target="_blank">
+-                    <img src={viteLogo} className="logo" alt="Vite logo" />
+-                </a>
+-                <a href="https://react.dev" target="_blank">
+-                    <img src={reactLogo} className="logo react" alt="React logo" />
+-                </a>
+-            </div>
+-            <h1>Vite + React</h1>
+-            <div className="card">
+-                <button onClick={() => setCount((count) => count + 1)}>
+-                    count is {count}
+-                </button>
+-                <p>
+-                    Edit <code>src/App.jsx</code> and save to test HMR
+-                </p>
++        <nav className="bg-white shadow-sm">
++            <div className="container mx-auto px-6 py-4 flex justify-between items-center">
++                <Link to="/" className="text-xl font-bold text-blue-600">EventSys</Link>
++                <div className="space-x-4">
++                    <Link to="/" className="text-gray-600 hover:text-blue-600">Events</Link>
++                    {user ? (
++                        <>
++                            <span className="text-gray-800 font-medium">Hello, {user.username}</span>
++                            <button
++                                onClick={logout}
++                                className="text-red-500 hover:text-red-700"
++                            >
++                                Logout
++                            </button>
++                        </>
++                    ) : (
++                        <>
++                            <Link to="/login" className="text-gray-600 hover:text-blue-600">Login</Link>
++                            <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Register</Link>
++                        </>
++                    )}
++                </div>
+             </div>
+-            <p className="read-the-docs">
+-                Click on the Vite and React logos to learn more
+-            </p>
+-        </>
+-    )
++        </nav>
++    );
++}
++
++function App() {
++    return (
++        <AuthProvider>
++            <Router>
++                <div className="min-h-screen bg-gray-50">
++                    <Navigation />
++                    <Routes>
++                        <Route path="/login" element={<Login />} />
++                        <Route path="/register" element={<Register />} />
++                        <Route path="/" element={<div className="container mx-auto p-6"><h1 className="text-2xl">Welcome to EventSys</h1><p>Please login or register.</p></div>} />
++                    </Routes>
++                </div>
++            </Router>
++        </AuthProvider>
++    );
+ }
+ 
+-export default App
++export default App;
+diff --git a/src/client/src/components/ProtectedRoute.jsx b/src/client/src/components/ProtectedRoute.jsx
+new file mode 100644
+index 0000000..d5d9f8a
+--- /dev/null
++++ b/src/client/src/components/ProtectedRoute.jsx
+@@ -0,0 +1,22 @@
++import { Navigate } from 'react-router-dom';
++import { useAuth } from '../context/authContext';
++
++const ProtectedRoute = ({ children, adminOnly }) => {
++    const { user, loading } = useAuth();
++
++    if (loading) {
++        return <div>Loading...</div>;
++    }
++
++    if (!user) {
++        return <Navigate to="/login" />;
++    }
++
++    if (adminOnly && !user.isAdmin) {
++        return <Navigate to="/" />;
++    }
++
++    return children;
++};
++
++export default ProtectedRoute;
+diff --git a/src/client/src/context/authContext.jsx b/src/client/src/context/authContext.jsx
+new file mode 100644
+index 0000000..2b4dc67
+--- /dev/null
++++ b/src/client/src/context/authContext.jsx
+@@ -0,0 +1,72 @@
++import { createContext, useState, useEffect, useContext } from 'react';
++import axios from 'axios';
++
++const AuthContext = createContext(null);
++
++export const AuthProvider = ({ children }) => {
++    const [user, setUser] = useState(null);
++    const [loading, setLoading] = useState(true);
++
++    useEffect(() => {
++        const storedUser = localStorage.getItem('user');
++        const token = localStorage.getItem('token');
++
++        if (storedUser && token) {
++            setUser(JSON.parse(storedUser));
++            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
++        }
++        setLoading(false);
++    }, []);
++
++    const login = async (username, password) => {
++        try {
++            const response = await axios.post("/api/v1/auth/login", { username, password });
++            const { user: userData, token } = response.data;
++
++            setUser(userData);
++            localStorage.setItem('user', JSON.stringify(userData));
++            localStorage.setItem('token', token);
++
++            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
++            return { success: true };
++        } catch (error) {
++            console.error("Login failed:", error);
++            return { success: false, error: error.response?.data?.error || "Login failed" };
++        }
++    };
++
++    const register = async (username, password) => {
++        try {
++            const response = await axios.post("/api/v1/auth/register", { username, password });
++            const { user: userData, token } = response.data;
++
++            // Auto login after register
++            if (userData && token) {
++                setUser(userData);
++                localStorage.setItem('user', JSON.stringify(userData));
++                localStorage.setItem('token', token);
++                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
++            }
++
++            return { success: true };
++        } catch (error) {
++            console.error("Registration failed:", error);
++            return { success: false, error: error.response?.data?.error || "Registration failed" };
++        }
++    };
++
++    const logout = () => {
++        setUser(null);
++        localStorage.removeItem('user');
++        localStorage.removeItem('token');
++        delete axios.defaults.headers.common['Authorization'];
++    };
++
++    return (
++        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
++            {!loading && children}
++        </AuthContext.Provider>
++    );
++};
++
++export const useAuth = () => useContext(AuthContext);
+diff --git a/src/client/src/pages/Login.jsx b/src/client/src/pages/Login.jsx
+new file mode 100644
+index 0000000..6b5e7e0
+--- /dev/null
++++ b/src/client/src/pages/Login.jsx
+@@ -0,0 +1,64 @@
++import { useState } from 'react';
++import { useAuth } from '../context/authContext';
++import { useNavigate, Link } from 'react-router-dom';
++
++const Login = () => {
++    const [username, setUsername] = useState('');
++    const [password, setPassword] = useState('');
++    const [error, setError] = useState('');
++    const { login } = useAuth();
++    const navigate = useNavigate();
++
++    const handleSubmit = async (e) => {
++        e.preventDefault();
++        setError('');
++        const result = await login(username, password);
++        if (result.success) {
++            navigate('/');
++        } else {
++            setError(result.error);
++        }
++    };
++
++    return (
++        <div className="min-h-screen flex items-center justify-center bg-gray-100">
++            <div className="bg-white p-8 rounded-lg shadow-md w-96">
++                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Login</h2>
++                {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">{error}</div>}
++                <form onSubmit={handleSubmit}>
++                    <div className="mb-4">
++                        <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
++                        <input
++                            type="text"
++                            value={username}
++                            onChange={(e) => setUsername(e.target.value)}
++                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
++                            required
++                        />
++                    </div>
++                    <div className="mb-6">
++                        <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
++                        <input
++                            type="password"
++                            value={password}
++                            onChange={(e) => setPassword(e.target.value)}
++                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
++                            required
++                        />
++                    </div>
++                    <button
++                        type="submit"
++                        className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
++                    >
++                        Login
++                    </button>
++                    <div className="mt-4 text-center text-sm">
++                        <Link to="/register" className="text-blue-500 hover:text-blue-700">Need an account? Register</Link>
++                    </div>
++                </form>
++            </div>
++        </div>
++    );
++};
++
++export default Login;
+diff --git a/src/client/src/pages/Register.jsx b/src/client/src/pages/Register.jsx
+new file mode 100644
+index 0000000..cc9aa94
+--- /dev/null
++++ b/src/client/src/pages/Register.jsx
+@@ -0,0 +1,64 @@
++import { useState } from 'react';
++import { useAuth } from '../context/authContext';
++import { useNavigate, Link } from 'react-router-dom';
++
++const Register = () => {
++    const [username, setUsername] = useState('');
++    const [password, setPassword] = useState('');
++    const [error, setError] = useState('');
++    const { register } = useAuth();
++    const navigate = useNavigate();
++
++    const handleSubmit = async (e) => {
++        e.preventDefault();
++        setError('');
++        const result = await register(username, password);
++        if (result.success) {
++            navigate('/login');
++        } else {
++            setError(result.error);
++        }
++    };
++
++    return (
++        <div className="min-h-screen flex items-center justify-center bg-gray-100">
++            <div className="bg-white p-8 rounded-lg shadow-md w-96">
++                <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">Register</h2>
++                {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">{error}</div>}
++                <form onSubmit={handleSubmit}>
++                    <div className="mb-4">
++                        <label className="block text-gray-700 text-sm font-bold mb-2">Username</label>
++                        <input
++                            type="text"
++                            value={username}
++                            onChange={(e) => setUsername(e.target.value)}
++                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
++                            required
++                        />
++                    </div>
++                    <div className="mb-6">
++                        <label className="block text-gray-700 text-sm font-bold mb-2">Password</label>
++                        <input
++                            type="password"
++                            value={password}
++                            onChange={(e) => setPassword(e.target.value)}
++                            className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
++                            required
++                        />
++                    </div>
++                    <button
++                        type="submit"
++                        className="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded hover:bg-blue-600 transition duration-200"
++                    >
++                        Register
++                    </button>
++                    <div className="mt-4 text-center text-sm">
++                        <Link to="/login" className="text-blue-500 hover:text-blue-700">Already have an account? Login</Link>
++                    </div>
++                </form>
++            </div>
++        </div>
++    );
++};
++
++export default Register;
+-- 
+2.43.0
+
