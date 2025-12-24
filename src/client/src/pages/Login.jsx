@@ -12,11 +12,17 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+
+        if (!username.trim() || !password.trim()) {
+            setError('Please enter both username and password');
+            return;
+        }
+
         const result = await login(username, password);
         if (result.success) {
             navigate('/');
         } else {
-            setError(result.error);
+            setError(result.error || 'Invalid username or password');
         }
     };
 

@@ -1,7 +1,7 @@
 const fs = require('fs/promises');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '../../data');
+const DATA_DIR = process.env.DATA_PATH ? path.resolve(__dirname, process.env.DATA_PATH) : path.join(__dirname, '../../data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const EVENTS_FILE = path.join(DATA_DIR, 'events.json');
 const REGISTRATIONS_FILE = path.join(DATA_DIR, 'registrations.json');

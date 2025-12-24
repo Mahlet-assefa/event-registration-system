@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 // Create event (Admin only)
 router.post('/', authenticateToken, isAdmin, async (req, res) => {
     try {
-        const { title, date, description } = req.body;
+        const { title, date, description, capacity } = req.body;
         if (!title || !date) {
             return res.status(400).json({ error: 'Title and date required' });
         }
@@ -27,7 +27,8 @@ router.post('/', authenticateToken, isAdmin, async (req, res) => {
             id: uuidv4(),
             title,
             date,
-            description: description || ''
+            description: description || '',
+            capacity: parseInt(capacity) || 50 // Default capacity if not provided
         };
 
         await saveEvent(newEvent);
@@ -97,8 +98,20 @@ router.post('/register', authenticateToken, async (req, res) => {
             return res.status(400).json({ error: 'EventId required' });
         }
 
-        // Check if already registered
+        // Capacity check (CR-001)
+        const events = await getEvents();
+        const event = events.find(e => e.id === eventId);
+        if (!event) {
+            return res.status(404).json({ error: 'Event not found' });
+        }
+
         const regs = await getRegistrations();
+        const eventRegs = regs.filter(r => r.eventId === eventId);
+
+        if (event.capacity && eventRegs.length >= event.capacity) {
+            return res.status(400).json({ error: 'Event is full' });
+        }
+
         if (regs.find(r => r.userId === userId && r.eventId === eventId)) {
             return res.status(400).json({ error: 'Already registered' });
         }
