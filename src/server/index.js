@@ -2,9 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
+<<<<<<< HEAD
 const authRoutes = require('./routes/auth-routes');
 const eventRoutes = require('./routes/event-routes');
 
+=======
+>>>>>>> feature/project-foundation
 const fs = require('fs');
 const path = require('path');
 const LOG_FILE = path.join(__dirname, '../../server.log');
@@ -22,11 +25,14 @@ app.use((req, res, next) => {
     next();
 });
 
+<<<<<<< HEAD
 console.log('Mounting /api/v1/auth', authRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/events', eventRoutes);
 console.log('Routes mounted');
 
+=======
+>>>>>>> feature/project-foundation
 app.get('/', (req, res) => {
     res.send('Event Registration System API');
 });
