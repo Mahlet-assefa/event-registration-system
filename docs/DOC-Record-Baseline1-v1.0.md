@@ -9,10 +9,11 @@ This baseline establishes the initial project structure, including the React cli
 
 ## Contents
 - **docs/**
-    - SCMP.docx (Placeholder)
-    - CI_Registry.docx (Placeholder)
+    - DOC-Plan-SCMP-v1.0.docx (Placeholder)
+    - DOC-Registry-CI-v1.0.docx (Placeholder)
     - DOC-API-Endpoints-v1.0.md
     - DOC-Setup-Guide-v1.0.md
+    - DOC-Record-Baseline1-v1.0.md
 - **src/**
     - client/ (React Vite Scaffold)
     - server/ (Express Scaffold)
