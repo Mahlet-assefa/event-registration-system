@@ -5,5 +5,12 @@
     "date": "2025-12-25",
     "description": "session",
     "capacity": 2
+  },
+  {
+    "id": "e4c90099-9f4e-4fbd-8be9-c8c23dd9ab0a",
+    "title": "Test Event",
+    "date": "2025-12-30",
+    "description": "Capacity test",
+    "capacity": 1
   }
 ]

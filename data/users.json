@@ -22,5 +22,11 @@
     "username": "admin",
     "password": "$2b$10$VZjwcwKflfpAaGK6Q3TMHO0Ld0UqQEwmcmWXzjEurqOrGNcgu9cHa",
     "isAdmin": true
+  },
+  {
+    "id": "00385355-d03d-4c67-be21-27231d5c366a",
+    "username": "testuser",
+    "password": "$2b$10$L7dPvK56N5gyNhLIxrk/Yu6ZnkzMhbW9Ya5hD8k99xgk.0/DkAWH6",
+    "isAdmin": false
   }
 ]
