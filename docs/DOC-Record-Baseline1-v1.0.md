@@ -9,8 +9,8 @@ This baseline establishes the initial project structure, including the React cli
 
 ## Contents
 - **docs/**
-    - DOC-Plan-SCMP-v1.0.docx (Placeholder)
-    - DOC-Registry-CI-v1.0.docx (Placeholder)
+    - DOC-Plan-SCMP-v1.0.docx 
+    - DOC-Registry-CI-v1.0.docx 
     - DOC-API-Endpoints-v1.0.md
     - DOC-Setup-Guide-v1.0.md
     - DOC-Record-Baseline1-v1.0.md
@@ -20,6 +20,3 @@ This baseline establishes the initial project structure, including the React cli
 - **tests/** (Empty)
 - **.gitignore**
 - **README.md**
-
-## Known Issues
-- `SCMP.docx` and `CI_Registry.docx` are currently text placeholders.
